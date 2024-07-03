@@ -22,19 +22,20 @@ func SetupEnvironment() {
 
 func SetupPaginator() {
 	// Configure paginator
-	options := Paginator.Options{
-		Connection: DB,
-		Page:       1,
-		PerPage:    25,
-		Path:       "tests/default",
+	boundaries := Paginator.Boundaries{
+		Page:    1,
+		PerPage: 25,
+		Path:    "tests/default",
 	}
 
-	Paginator.SetDefaultOptions(&options)
+	Paginator.SetDefaultBoundaries(&boundaries)
+	Paginator.SetDefaultConnection(DB)
 }
 
 func CleanUp(t *testing.T) {
 	t.Cleanup(func() {
-		Paginator.SetDefaultOptions(nil)
+		Paginator.SetDefaultBoundaries(nil)
+		Paginator.SetDefaultConnection(nil)
 	})
 }
 
