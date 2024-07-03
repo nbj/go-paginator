@@ -236,11 +236,11 @@ func Test_it_returns_paginated_result(t *testing.T) {
 	// Assert
 	assert.Equal(t, 5, paginator.Total)
 	assert.NotEmpty(t, paginator.Items)
-	assert.Equal(t, "Value [1]", paginator.Items[0].Value)
-	assert.Equal(t, "Value [2]", paginator.Items[1].Value)
-	assert.Equal(t, "Value [3]", paginator.Items[2].Value)
-	assert.Equal(t, "Value [4]", paginator.Items[3].Value)
-	assert.Equal(t, "Value [5]", paginator.Items[4].Value)
+	assert.Equal(t, "Value [1]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [2]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [3]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [4]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [5]", paginator.Items.Shift().Value)
 }
 
 func Test_it_returns_paginated_result_based_on_query_functions_passed(t *testing.T) {
@@ -257,7 +257,7 @@ func Test_it_returns_paginated_result_based_on_query_functions_passed(t *testing
 	// Assert
 	assert.Equal(t, 1, paginator.Total)
 	assert.NotEmpty(t, paginator.Items)
-	assert.Equal(t, "Value [2]", paginator.Items[0].Value)
+	assert.Equal(t, "Value [2]", paginator.Items.First().Value)
 }
 
 func Test_it_returns_paginated_result_based_on_multiple_query_functions_passed(t *testing.T) {
@@ -278,6 +278,24 @@ func Test_it_returns_paginated_result_based_on_multiple_query_functions_passed(t
 	// Assert
 	assert.Equal(t, 2, paginator.Total)
 	assert.NotEmpty(t, paginator.Items)
-	assert.Equal(t, "Value [4]", paginator.Items[0].Value)
-	assert.Equal(t, "Value [2]", paginator.Items[1].Value)
+	assert.Equal(t, "Value [4]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [2]", paginator.Items.Shift().Value)
+}
+
+func Test_it_returns_paginated_items_as_a_collection(t *testing.T) {
+	// Arrange
+	Tests.SetupEnvironment()
+	Tests.SetupPaginator()
+
+	// Act
+	paginator := Paginator.Paginate[Tests.TestCaseModel]()
+
+	// Assert
+	assert.Equal(t, 5, paginator.Total)
+	assert.True(t, paginator.Items.IsNotEmpty())
+	assert.Equal(t, "Value [1]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [2]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [3]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [4]", paginator.Items.Shift().Value)
+	assert.Equal(t, "Value [5]", paginator.Items.Shift().Value)
 }

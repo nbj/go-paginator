@@ -4,6 +4,7 @@ go 1.21.8
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/nbj/go-collections v1.0.0
 	github.com/stretchr/testify v1.9.0
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.10

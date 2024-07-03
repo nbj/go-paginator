@@ -1,7 +1,9 @@
 package Paginator
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/nbj/go-collections/Collection"
 	"gorm.io/gorm"
 	"math"
 	"reflect"
@@ -13,20 +15,20 @@ var DefaultConnection *gorm.DB
 type Paginator[T any] struct {
 	connection *gorm.DB
 
-	Page            int    `json:"page"`
-	PerPage         int    `json:"per_page"`
-	NextPage        int    `json:"next_page"`
-	PreviousPage    int    `json:"previous_page"`
-	LastPage        int    `json:"last_page"`
-	Total           int    `json:"total"`
-	FirstPageUrl    string `json:"first_page_url,omitempty"`
-	LastPageUrl     string `json:"last_page_url,omitempty"`
-	NextPageUrl     string `json:"next_page_url,omitempty"`
-	PreviousPageUrl string `json:"previous_page_url,omitempty"`
-	From            int    `json:"from"`
-	To              int    `json:"to"`
-	Path            string `json:"path"`
-	Items           []T    `json:"items"`
+	Page            int                       `json:"page"`
+	PerPage         int                       `json:"per_page"`
+	NextPage        int                       `json:"next_page"`
+	PreviousPage    int                       `json:"previous_page"`
+	LastPage        int                       `json:"last_page"`
+	Total           int                       `json:"total"`
+	FirstPageUrl    string                    `json:"first_page_url,omitempty"`
+	LastPageUrl     string                    `json:"last_page_url,omitempty"`
+	NextPageUrl     string                    `json:"next_page_url,omitempty"`
+	PreviousPageUrl string                    `json:"previous_page_url,omitempty"`
+	From            int                       `json:"from"`
+	To              int                       `json:"to"`
+	Path            string                    `json:"path"`
+	Items           *Collection.Collection[T] `json:"items"`
 }
 
 type Boundaries struct {
@@ -57,7 +59,7 @@ func Paginate[T any](arguments ...any) *Paginator[T] {
 	var connection *gorm.DB
 	var queries []func(connection *gorm.DB) *gorm.DB
 
-	var output *[]T
+	var output []T
 
 	// If no arguments have been passed to the paginate function
 	// and no default connection has been set, we simply return
@@ -165,7 +167,7 @@ func Paginate[T any](arguments ...any) *Paginator[T] {
 
 	// Lastly we want to add the actual data to the paginator
 	paginator.connection.Offset(paginator.From - 1).Limit(paginator.PerPage).Find(&output)
-	paginator.Items = *output
+	paginator.Items = Collection.Collect(output)
 
 	return &paginator
 }
@@ -254,4 +256,15 @@ func (paginator *Paginator[T]) assignPageUrls() *Paginator[T] {
 	}
 
 	return paginator
+}
+
+func (paginator *Paginator[T]) MarshalJSON() ([]byte, error) {
+	type Alias Paginator[T]
+	return json.Marshal(&struct {
+		*Alias
+		Items []T `json:"items"`
+	}{
+		Alias: (*Alias)(paginator),
+		Items: paginator.Items.Items,
+	})
 }
